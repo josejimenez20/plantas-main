@@ -20,7 +20,7 @@ export class UsersService {
   }
 
   async getUser(query: FilterQuery<User>) {
-    const user = await this.userModel.findOne(query).populate('municipio').lean();
+    const user = (await (await this.userModel.findOne(query).populate('municipio')).populate('favorites')).toObject();
 
     if(!user) {
       throw new NotFoundException('User not found');
