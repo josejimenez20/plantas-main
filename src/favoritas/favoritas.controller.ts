@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { FavoritasService } from './favoritas.service';
 import { CreateFavoritaDto } from './dto/create-favorita.dto';
 import { UpdateFavoritaDto } from './dto/update-favorita.dto';
+import { DeleteFavoritaDto } from './dto/delete-favorita.dto';
 
 @Controller('favoritas')
 export class FavoritasController {
@@ -27,8 +28,8 @@ export class FavoritasController {
     return this.favoritasService.update(+id, updateFavoritaDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favoritasService.remove(+id);
+  @Delete()
+  remove(@Body() deleteFavoritaDto: DeleteFavoritaDto) {
+    return this.favoritasService.remove(deleteFavoritaDto);
   }
 }
