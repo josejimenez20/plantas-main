@@ -20,7 +20,16 @@ export class UsersService {
   }
 
   async getUser(query: FilterQuery<User>) {
-    const user = (await (await this.userModel.findOne(query).populate('municipio')).populate('favorites')).toObject();
+    const userDoc = await this.userModel.findOne(query)
+      .populate('municipio')
+      .populate({
+      path: 'favorites',
+      populate: { path: 'imagen' },
+    });
+    if (!userDoc) {
+      throw new NotFoundException('User not found');
+    }
+    const user = userDoc.toObject();
 
     if(!user) {
       throw new NotFoundException('User not found');
