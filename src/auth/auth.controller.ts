@@ -6,6 +6,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,5 +39,10 @@ export class AuthController {
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
+
+  @Post('change-password')
+  async changePassword(@Body() dto: ChangePasswordDto){
+    return this.authService.changePassword(dto.userId, dto.currentPassword, dto.newPassword);
   }
 }

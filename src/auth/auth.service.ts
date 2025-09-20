@@ -171,4 +171,28 @@ export class AuthService {
 
     await this.resetTokenModel.deleteOne({ _id: record._id });
   }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.usersService.getUser({ _id: userId });
+    
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+  
+    const isCurrentPasswordValid = await compare(currentPassword, user.password);
+  
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('La contraseña actual no es correcta');
+    }
+  
+    const hashedNewPassword = await hash(newPassword, 10);
+  
+    await this.usersService.updateUser(
+      { _id: user._id },
+      { $set: { password: hashedNewPassword } },
+    );
+  
+    return { message: 'La contraseña ha sido cambiada exitosamente' };
+  }
+
 }
