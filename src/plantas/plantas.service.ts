@@ -56,11 +56,11 @@ export class PlantasService {
     };
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.plantaModel
       .findById(id)
-      .populate('municipio')
-      .populate('image');
+      .populate('municipio_id')
+      .populate('imagen');
   }
 
   update(id: number, updatePlantaDto: UpdatePlantaDto) {

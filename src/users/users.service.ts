@@ -33,6 +33,16 @@ export class UsersService {
     return this.userModel.find({});
   }
 
+  async getUserById(id: string) {
+    const user = await this.userModel.findById(id);
+    
+    if(!user) {
+      throw new NotFoundException('User not found');
+    }
+    const {password, refreshToken, role,...rest} = user.toObject()
+    return rest
+  }
+
   async updateUser(query: FilterQuery<User>, data: UpdateQuery<User>) {
     return this.userModel.findOneAndUpdate(query, data);
   }

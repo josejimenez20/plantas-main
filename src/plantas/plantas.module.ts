@@ -16,5 +16,6 @@ import { DmsService } from 'src/dms/dms.service';
   ],
   controllers: [PlantasController],
   providers: [PlantasService, DmsService],
+  exports: [PlantasService],
 })
 export class PlantasModule {}

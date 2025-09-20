@@ -20,7 +20,7 @@ export class PlantasController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.plantasService.findOne(+id);
+    return this.plantasService.findOne(id);
   }
 
   @Get('filter/query')

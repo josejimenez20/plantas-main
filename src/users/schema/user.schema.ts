@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { SchemaTypes, Types } from "mongoose";
 import { Municipio } from "../../municipio/schema/municipio.schema";
+import { Planta } from "src/plantas/schema/planta.schemas";
 
 @Schema({timestamps: true})
 export class User {
@@ -22,6 +23,12 @@ export class User {
   @Prop()
   password: string;
   
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Planta' }],
+    default: [],
+  })
+  favorites: Planta[];
+    
   @Prop({ required: true })
   role: string;
 }

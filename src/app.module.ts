@@ -13,6 +13,7 @@ import { RolesGuard } from './auth/guards/jwt-roles.guard';
 import { MailModule } from './mail/mail.module';
 import { MunicipioModule } from './municipio/municipio.module';
 import { PlantasModule } from './plantas/plantas.module';
+import { FavoritasModule } from './favoritas/favoritas.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PlantasModule } from './plantas/plantas.module';
     MunicipioModule,
     PlantasModule,
     AuthModule,
+    FavoritasModule,
   ],
   controllers: [AppController, DmsController],
   providers: [AppService, DmsService, RolesGuard],
