@@ -14,7 +14,7 @@ export class PlantasService {
     private readonly dmsService: DmsService,
   ) {}
   create(createPlantaDto: CreatePlantaDto) {
-    return 'This action adds a new planta';
+    return 'This action adds a new planta on plantas';
   }
 
   async findAll(page: number = 1, limit: number = 10, sort: string = 'nombre') {
