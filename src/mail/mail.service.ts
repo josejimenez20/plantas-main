@@ -31,4 +31,19 @@ export class MailService {
     };
     await this.transporter.sendMail(mailOptions);
   }
+
+  async sendCode(to: string, subject: string, code: string){
+    const mailOptions = {
+      from: `"Soporte" <${process.env.MAIL_FROM}>`,  
+      to,
+      subject,
+      html: ` <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+          <h2>Código para iniciar sesión</h2>
+          <p>Utiliza el siguiente codigo para iniciar sesión en tu aplicación web:</p>
+          <strong>${code}</strong>
+          <p>Este código expirará en 5 minutos.</p>
+        </div>`
+    }
+    await this.transporter.sendMail(mailOptions);
+  }
 }

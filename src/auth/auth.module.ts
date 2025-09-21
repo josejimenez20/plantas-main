@@ -10,6 +10,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PasswordResetToken, PasswordResetTokenSchema } from './schemas/password-reset.schema';
 import { MailModule } from 'src/mail/mail.module';
+import { TwoFactorCode, TwoFactorCodeSchema } from './schemas/two-factor-code.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,10 @@ import { MailModule } from 'src/mail/mail.module';
         name: PasswordResetToken.name,
         schema: PasswordResetTokenSchema,
       },
+      {
+        name: TwoFactorCode.name,
+        schema: TwoFactorCodeSchema
+      }
     ]),
     UsersModule, PassportModule, JwtModule],
   controllers: [AuthController],

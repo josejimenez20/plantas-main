@@ -84,7 +84,7 @@ export class UsersService {
 
   async softDeleteUser(id: string) {
     const user = await this.userModel.findOneAndUpdate(
-      { _id: id },
+      { _id: id, isDeleted: false },
       { $set: { isDeleted: true } },
       { new: true },
     );

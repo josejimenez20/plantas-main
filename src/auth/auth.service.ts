@@ -11,11 +11,12 @@ import { Response } from 'express';
 import { User } from 'src/users/schema/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { TokenPayload } from './token-payload.interface';
-import { randomUUID } from 'crypto';
+import { randomInt, randomUUID } from 'crypto';
 import { InjectModel } from '@nestjs/mongoose';
 import { PasswordResetToken } from './schemas/password-reset.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { MailService } from 'src/mail/mail.service';
+import { TwoFactorCode } from './schemas/two-factor-code.schema';
 
 @Injectable()
 export class AuthService {
@@ -30,9 +31,11 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
     @InjectModel(PasswordResetToken.name)
     private readonly resetTokenModel: Model<PasswordResetToken>,
-    private readonly mailService: MailService,
+    @InjectModel(TwoFactorCode.name)
+    private readonly twoFactorModel: Model<TwoFactorCode>,
   ) {
     this.urlFrontend = this.configService.getOrThrow<string>('URL_FRONTEND');
     this.jwt_access_token_secret = this.configService.getOrThrow<string>('JWT_ACCESS_TOKEN_SECRET');
@@ -102,7 +105,44 @@ export class AuthService {
       },
     };
   }
+  async loginStepOne(email: string, password: string) {
+    const user = await this.verifyUser(email, password);
 
+    const code = randomInt(100000, 999999).toString();
+
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    await this.twoFactorModel.create({
+      userId: user._id,
+      code,
+      expiresAt,
+    });
+
+    await this.mailService.sendCode(
+       user.email,
+       'Tu código de verificación',
+       code,
+    );
+
+    return { 
+      message: 'Código enviado al correo. Expira en 5 minutos.',
+      userId: user._id
+     };
+  }
+
+    async loginStepTwo(userId: string, code: string, response: Response) {
+      const record = await this.twoFactorModel.findOne({
+        userId: new Types.ObjectId(userId),
+        code,
+      });
+    if (!record || record.expiresAt < new Date()) {
+      throw new UnauthorizedException('Código inválido o expirado');
+    }
+
+    await this.twoFactorModel.deleteOne({ _id: record._id });
+
+    const user = await this.usersService.getUser({ _id: userId });
+    return this.login(user, response);
+  }
   async verifyUser(email: string, password: string) {
   try {
     const user = await this.usersService.getUser({ email });

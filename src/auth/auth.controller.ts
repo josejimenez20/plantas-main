@@ -13,6 +13,20 @@ import { ChangeEmailDto } from './dto/change-email.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('login-step-one')
+  async loginStepOne(@Body('email') email: string, @Body('password') password: string) {
+    return this.authService.loginStepOne(email, password);
+  }
+
+  @Post('login-step-two')
+  async loginStepTwo(
+    @Body('userId') userId: string,
+    @Body('code') code: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.loginStepTwo(userId, code, response);
+  }
+
   @Post('login')
   @UseGuards(LocalAuthGuard)
   async login(
