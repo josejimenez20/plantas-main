@@ -195,4 +195,21 @@ export class AuthService {
     return { message: 'La contraseña ha sido cambiada exitosamente' };
   }
 
+  async changeEmail(userId: string, newEmail: string) {
+    const user = await this.usersService.getUser({ _id: userId });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const existingUser = await this.usersService.checkUserByEmail(newEmail);
+    if (existingUser) {
+      throw new BadRequestException('El correo electrónico ya está en uso');
+    }
+    await this.usersService.updateUser(
+      { _id: user._id },
+      { $set: { email: newEmail } },
+    );
+
+    return { message: 'El correo electrónico ha sido cambiado exitosamente' };
+  }
 }

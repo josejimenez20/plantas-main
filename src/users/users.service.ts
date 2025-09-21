@@ -30,7 +30,7 @@ export class UsersService {
         populate: { path: 'imagen' },
       });
     if (!userDoc) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found!');
     }
 
     const user = userDoc.toObject();
@@ -54,6 +54,14 @@ export class UsersService {
     return user;
   }
 
+async checkUserByEmail(email: string) {
+  const user = await this.userModel.findOne({ email });
+  if (user) {
+    throw new NotFoundException('User already exists with this email');
+  }
+  return user;
+}
+
   async getUsers() {
     return this.userModel.find({});
   }
@@ -62,7 +70,7 @@ export class UsersService {
     const user = await this.userModel.findById(id);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found getUserById');
     }
     const { password, refreshToken, role, ...rest } = user.toObject();
     return rest;
