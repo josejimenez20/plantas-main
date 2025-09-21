@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import { User } from 'src/users/schema/user.schema';
@@ -50,5 +50,10 @@ export class AuthController {
   @Post('change-email')
   async changeEmail(@Body() dto: ChangeEmailDto) {
     return this.authService.changeEmail(dto.userId, dto.newEmail);
+  }
+
+  @Delete('delete-account/:id')
+  async deleteAccount(@Param('id') id: string) {
+    return this.authService.softDelete(id);
   }
 }

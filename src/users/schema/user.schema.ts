@@ -31,6 +31,14 @@ export class User {
     
   @Prop({ required: true })
   role: string;
+
+  @Prop({
+    required: true,
+    default: false
+  })
+  isDeleted: boolean
+
+  
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

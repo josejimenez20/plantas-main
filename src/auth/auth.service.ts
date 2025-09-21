@@ -104,22 +104,25 @@ export class AuthService {
   }
 
   async verifyUser(email: string, password: string) {
-    try {
-      const user = await this.usersService.getUser({
-        email,
-      });
+  try {
+    const user = await this.usersService.getUser({ email });
 
-      const authenticated = await compare(password, user.password);
-
-      if (!authenticated) {
-        throw new UnauthorizedException();
-      }
-
-      return user;
-    } catch (err) {
-      throw new UnauthorizedException('Credentials are not valid');
+    if (!user || user.isDeleted) {
+      throw new UnauthorizedException('User is deleted or not found');
     }
+
+    const authenticated = await compare(password, user.password);
+
+    if (!authenticated) {
+      throw new UnauthorizedException();
+    }
+
+    return user;
+  } catch (err) {
+    throw new UnauthorizedException('Credentials are not valid');
   }
+}
+
 
   async verifyRefreshToken(refreshToken: string, userId: string) {
     try {
@@ -174,24 +177,24 @@ export class AuthService {
 
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const user = await this.usersService.getUser({ _id: userId });
-    
+
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-  
+
     const isCurrentPasswordValid = await compare(currentPassword, user.password);
-  
+
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('La contraseña actual no es correcta');
     }
-  
+
     const hashedNewPassword = await hash(newPassword, 10);
-  
+
     await this.usersService.updateUser(
       { _id: user._id },
       { $set: { password: hashedNewPassword } },
     );
-  
+
     return { message: 'La contraseña ha sido cambiada exitosamente' };
   }
 
@@ -211,5 +214,9 @@ export class AuthService {
     );
 
     return { message: 'El correo electrónico ha sido cambiado exitosamente' };
+  }
+
+  async softDelete(id: string){
+    return this.usersService.softDeleteUser(id);
   }
 }

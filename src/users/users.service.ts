@@ -23,12 +23,13 @@ export class UsersService {
 
   async getUser(query: FilterQuery<User>) {
     const userDoc = await this.userModel
-      .findOne(query)
+      .findOne({ ...query, isDeleted: false })
       .populate('municipio')
       .populate({
         path: 'favorites',
         populate: { path: 'imagen' },
       });
+
     if (!userDoc) {
       throw new NotFoundException('User not found!');
     }
@@ -47,27 +48,24 @@ export class UsersService {
         };
       }
     }
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
 
     return user;
   }
 
-async checkUserByEmail(email: string) {
-  const user = await this.userModel.findOne({ email });
-  if (user) {
-    throw new NotFoundException('User already exists with this email');
+  async checkUserByEmail(email: string) {
+    const user = await this.userModel.findOne({ email, isDeleted: false });
+    if (user) {
+      throw new NotFoundException('User already exists with this email');
+    }
+    return user;
   }
-  return user;
-}
 
   async getUsers() {
-    return this.userModel.find({});
+    return this.userModel.find({ isDeleted: false });
   }
 
   async getUserById(id: string) {
-    const user = await this.userModel.findById(id);
+    const user = await this.userModel.findOne({ _id: id, isDeleted: false });
 
     if (!user) {
       throw new NotFoundException('User not found getUserById');
@@ -77,6 +75,24 @@ async checkUserByEmail(email: string) {
   }
 
   async updateUser(query: FilterQuery<User>, data: UpdateQuery<User>) {
-    return this.userModel.findOneAndUpdate(query, data);
+    return this.userModel.findOneAndUpdate(
+      { ...query, isDeleted: false },
+      data,
+      { new: true },
+    );
+  }
+
+  async softDeleteUser(id: string) {
+    const user = await this.userModel.findOneAndUpdate(
+      { _id: id },
+      { $set: { isDeleted: true } },
+      { new: true },
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found or already deleted');
+    }
+
+    return { message: 'User has been deleted successfully' };
   }
 }
