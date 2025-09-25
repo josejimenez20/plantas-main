@@ -8,7 +8,6 @@ export class MailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       service: process.env.MAIL_HOST,
-      port:4000,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
