@@ -55,12 +55,32 @@ export class PlantasService {
       limit,
     };
   }
-
-  findOne(id: string) {
-    return this.plantaModel
+  async findOne(id: string) {
+    const plantaDoc = await this.plantaModel
       .findById(id)
       .populate('municipio_id')
       .populate('imagen');
+
+    if (!plantaDoc) {
+      return null;
+    }
+
+    const planta = plantaDoc.toObject();
+
+    if (planta.imagen && planta.imagen._id) {
+      const result = await this.dmsService.getPresignedUrl(
+        planta.imagen._id.toString(),
+      );
+
+      planta.imagen = {
+        _id: planta.imagen._id,
+        title: planta.imagen.title,
+        url: result.url, 
+        isPublic: planta.imagen.isPublic ?? false,
+      };
+    }
+
+    return planta;
   }
 
   update(id: number, updatePlantaDto: UpdatePlantaDto) {
