@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schema/user.schema';
 import { DmsModule } from 'src/dms/dms.module';
 import { DmsService } from 'src/dms/dms.service';
+import { ImgdbModule } from 'src/imgdb/imgdb.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { DmsService } from 'src/dms/dms.service';
         schema: UserSchema,
       }
     ]),
-    DmsModule
+    DmsModule,
+    ImgdbModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, DmsService],

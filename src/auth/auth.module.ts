@@ -8,9 +8,17 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PasswordResetToken, PasswordResetTokenSchema } from './schemas/password-reset.schema';
+import {
+  PasswordResetToken,
+  PasswordResetTokenSchema,
+} from './schemas/password-reset.schema';
 import { MailModule } from 'src/mail/mail.module';
-import { TwoFactorCode, TwoFactorCodeSchema } from './schemas/two-factor-code.schema';
+import {
+  TwoFactorCode,
+  TwoFactorCodeSchema,
+} from './schemas/two-factor-code.schema';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { MunicipioModule } from 'src/municipio/municipio.module';
 
 @Module({
   imports: [
@@ -22,11 +30,15 @@ import { TwoFactorCode, TwoFactorCodeSchema } from './schemas/two-factor-code.sc
       },
       {
         name: TwoFactorCode.name,
-        schema: TwoFactorCodeSchema
-      }
+        schema: TwoFactorCodeSchema,
+      },
     ]),
-    UsersModule, PassportModule, JwtModule],
+    UsersModule,
+    PassportModule,
+    JwtModule,
+    MunicipioModule,
+  ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy,JwtRefreshStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, GoogleStrategy],
 })
 export class AuthModule {}

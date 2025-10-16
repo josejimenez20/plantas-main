@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { SchemaTypes, Types } from "mongoose";
 import { Municipio } from "../../municipio/schema/municipio.schema";
 import { Planta } from "src/plantas/schema/planta.schemas";
+import { Image } from "src/imgdb/schemas/image.schema";
 
 @Schema({timestamps: true})
 export class User {
@@ -29,7 +30,7 @@ export class User {
   })
   favorites: Planta[];
     
-  @Prop({ required: true })
+  @Prop({ required: true, default: 'client' })
   role: string;
 
   @Prop({
@@ -38,7 +39,22 @@ export class User {
   })
   isDeleted: boolean
 
+    // Google OAuth fields
+  @Prop({ default: 'local' })
+  provider: string; // 'google', 'local'
+
+  @Prop()
+  providerId: string; 
+
+  @Prop()
+  picture: string;
   
+  @Prop({
+    type:  String,
+    ref: 'Image',
+  })
+  pictureMongo: Image;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

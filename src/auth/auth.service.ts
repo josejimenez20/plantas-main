@@ -103,8 +103,10 @@ export class AuthService {
         email: user.email,
         role: user.role,
       },
+      accessToken,
     };
   }
+
   async loginStepOne(email: string, password: string) {
     const user = await this.verifyUser(email, password);
 
@@ -125,7 +127,7 @@ export class AuthService {
 
     return { 
       message: 'Código enviado al correo. Expira en 5 minutos.',
-      userId: user._id
+      userId: user._id,
      };
   }
 
@@ -142,13 +144,19 @@ export class AuthService {
 
     const user = await this.usersService.getUser({ _id: userId });
     return this.login(user, response);
-  }
+    }
+  
   async verifyUser(email: string, password: string) {
   try {
     const user = await this.usersService.getUser({ email });
 
     if (!user || user.isDeleted) {
       throw new UnauthorizedException('User is deleted or not found');
+    }
+
+    // Si es usuario de Google, no puede hacer login con contraseña
+    if (user.provider === 'google') {
+      throw new UnauthorizedException('Por favor, inicia sesión con Google');
     }
 
     const authenticated = await compare(password, user.password);

@@ -1,16 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { hash } from 'bcryptjs';
 import { User } from './schema/user.schema';
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 import { CreateUserRequest } from './dto/create-user-request';
 import { DmsService } from 'src/dms/dms.service';
+import { ImgdbService } from 'src/imgdb/imgdb.service';
+import { ImageType } from 'src/imgdb/dto/image.dto';
+import { ImageDocument } from 'src/imgdb/schemas/image.schema';
+import { title } from 'process';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly dmsService: DmsService,
+    private readonly imgdbService: ImgdbService,
   ) {}
 
   async create(data: CreateUserRequest) {
@@ -21,15 +26,53 @@ export class UsersService {
     }).save();
   }
 
+  async createUser(userData: Partial<User>): Promise<User> {
+    try {
+      const user = new this.userModel(userData);
+      const savedUser = await user.save();
+      return savedUser;
+    } catch (error) {
+      console.error('❌ Error creando usuario:', error);
+      throw error;
+    }
+  }
+
+  async findUserAuth(filter: any): Promise<User | null> {
+    try {
+      const user = await this.userModel
+        .findOne({ ...filter, isDeleted: false })
+        .populate('municipio')
+        .exec();
+      return user;
+    } catch (error) {
+      console.error('Error en findUser:', error);
+      return null;
+    }
+  }
+  async findUser(filter: any): Promise<User | null> {
+    try {
+      const user = await this.userModel
+        .findOne({ ...filter, isDeleted: false })
+        .populate('municipio')
+        .exec();
+      return user;
+    } catch (error) {
+      console.error('Error en findUser:', error);
+      return null;
+    }
+  }
+
   async getUser(query: FilterQuery<User>) {
     const userDoc = await this.userModel
       .findOne({ ...query, isDeleted: false })
       .populate('municipio')
+      .populate('pictureMongo')
       .populate({
         path: 'favorites',
         populate: { path: 'imagen' },
       });
 
+    console.log(userDoc.toObject());
     if (!userDoc) {
       throw new NotFoundException('User not found!');
     }
@@ -47,6 +90,17 @@ export class UsersService {
           isPublic: planta.imagen.isPublic ?? false,
         };
       }
+    }
+
+    if (user.pictureMongo?._id) {
+      const result = await this.dmsService.getPresignedUrl(user.pictureMongo._id);
+      
+      user.pictureMongo = {
+        _id: user.pictureMongo._id,
+        title: user.pictureMongo.title,
+        url: result.url,
+        isPublic: user.pictureMongo.isPublic ?? false,
+      };
     }
 
     return user;
@@ -74,7 +128,31 @@ export class UsersService {
     return rest;
   }
 
-  async updateUser(query: FilterQuery<User>, data: UpdateQuery<User>) {
+  async updateUser(
+    query: FilterQuery<User>,
+    data: UpdateQuery<User>,
+    image?: Express.Multer.File,
+  ) {
+    if (image) {
+      console.log("Editando con imagen")
+      const user = await this.userModel.findOne({
+        ...query
+      });
+
+      if (user?.pictureMongo) {
+        await this.dmsService.deleteFile(user.pictureMongo._id);
+      }
+
+      const newImage = await this.getImage(image);
+      data.pictureMongo = newImage._id;
+      data.picture = newImage._id;
+
+      return this.userModel.findOneAndUpdate(
+        { ...query, isDeleted: false },
+        data,
+        { new: true },
+      );
+    }
     return this.userModel.findOneAndUpdate(
       { ...query, isDeleted: false },
       data,
@@ -94,5 +172,48 @@ export class UsersService {
     }
 
     return { message: 'User has been deleted successfully' };
+  }
+
+
+  async getImage(image: Express.Multer.File): Promise<ImageDocument> {
+    const imageInfo: ImageType = await this.dmsService.uploadSingleFile({
+      file: image,
+      isPublic: false,
+    });
+
+    const imageDB = {
+      _id: imageInfo.key,
+      url: imageInfo.url,
+      isPublic: imageInfo.isPublic,
+      title: image.originalname,
+    };
+
+    const newImage = await this.imgdbService.createImage(imageDB);
+
+    return newImage;
+  }
+
+  async putImage(
+    image: Express.Multer.File,
+    id: string,
+  ): Promise<ImageDocument> {
+    const deleteImage = await this.dmsService.deleteFile(id);
+    if (!deleteImage) throw new ConflictException('Imagen no encontrada');
+
+    const imageInfo: ImageType = await this.dmsService.uploadSingleFile({
+      file: image,
+      isPublic: false,
+    });
+
+    const imageDB = {
+      _id: imageInfo.key,
+      url: imageInfo.url,
+      isPublic: imageInfo.isPublic,
+      title: image.originalname,
+    };
+
+    const newImage = await this.imgdbService.createImage(imageDB);
+
+    return newImage;
   }
 }

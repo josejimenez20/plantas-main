@@ -15,5 +15,6 @@ import { Municipio, MunicipioSchema } from './schema/municipio.schema';
   ],
   controllers: [MunicipioController],
   providers: [MunicipioService],
+  exports: [MunicipioService],
 })
 export class MunicipioModule {}
