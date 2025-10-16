@@ -72,7 +72,6 @@ export class UsersService {
         populate: { path: 'imagen' },
       });
 
-    console.log(userDoc.toObject());
     if (!userDoc) {
       throw new NotFoundException('User not found!');
     }
@@ -138,15 +137,11 @@ export class UsersService {
       const user = await this.userModel.findOne({
         ...query
       });
-
-      if (user?.pictureMongo) {
-        await this.dmsService.deleteFile(user.pictureMongo._id);
-      }
-
       const newImage = await this.getImage(image);
       data.pictureMongo = newImage._id;
       data.picture = newImage._id;
 
+      console.log("Nueva imagen", newImage)
       return this.userModel.findOneAndUpdate(
         { ...query, isDeleted: false },
         data,
