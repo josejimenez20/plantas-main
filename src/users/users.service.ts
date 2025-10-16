@@ -141,7 +141,6 @@ export class UsersService {
       data.pictureMongo = newImage._id;
       data.picture = newImage._id;
 
-      console.log("Nueva imagen", newImage)
       return this.userModel.findOneAndUpdate(
         { ...query, isDeleted: false },
         data,
