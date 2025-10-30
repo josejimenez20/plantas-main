@@ -175,18 +175,14 @@ export class UsersService {
   }
 
   async softDeleteUser(id: string) {
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      { $set: { isDeleted: true } },
-      { new: true },
-    );
-
-    if (!user) {
-      throw new NotFoundException('User not found or already deleted');
-    }
-
-    return { message: 'User has been deleted successfully' };
-  }
+  const user = await this.userModel.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { $set: { isDeleted: true } }, 
+    { new: true },
+  );
+// ...
+return { message: 'User has been deleted successfully' };
+}
 
 
   async getImage(image: Express.Multer.File): Promise<ImageDocument> {
