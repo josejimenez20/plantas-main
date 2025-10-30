@@ -42,6 +42,7 @@ export class PlantasService {
           title: planta.imagen.title,
           url: result.url,
           isPublic: planta.imagen.isPublic ?? false,
+          privacy: planta.imagen.privacy
         };
       }
 
@@ -77,6 +78,7 @@ export class PlantasService {
         title: planta.imagen.title,
         url: result.url, 
         isPublic: planta.imagen.isPublic ?? false,
+        privacy: planta.imagen.privacy
       };
     }
 
@@ -173,6 +175,7 @@ export class PlantasService {
           title: planta.imagen.title,
           url: result.url,
           isPublic: planta.imagen.isPublic ?? false,
+          privacy: planta.imagen.privacy
         };
       }
 

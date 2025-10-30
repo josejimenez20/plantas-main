@@ -87,6 +87,7 @@ export class UsersService {
           title: planta.imagen.title,
           url: result.url,
           isPublic: planta.imagen.isPublic ?? false,
+          privacy: planta.imagen.privacy
         };
       }
     }
@@ -99,6 +100,7 @@ export class UsersService {
         title: user.pictureMongo.title,
         url: result.url,
         isPublic: user.pictureMongo.isPublic ?? false,
+        privacy: user.pictureMongo.privacy
       };
     }
 
@@ -196,6 +198,7 @@ return { message: 'User has been deleted successfully' };
       url: imageInfo.url,
       isPublic: imageInfo.isPublic,
       title: image.originalname,
+      privacy: 'Solo yo', // Default privacy al subir
     };
 
     const newImage = await this.imgdbService.createImage(imageDB);
@@ -220,6 +223,7 @@ return { message: 'User has been deleted successfully' };
       url: imageInfo.url,
       isPublic: imageInfo.isPublic,
       title: image.originalname,
+      privacy: 'Solo yo', // Default privacy al subir
     };
 
     const newImage = await this.imgdbService.createImage(imageDB);
