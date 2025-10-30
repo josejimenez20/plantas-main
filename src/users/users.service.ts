@@ -1,4 +1,4 @@
-import { ConflictException, ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ConsoleLogger, Injectable, NotFoundException, BadRequestException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { hash } from 'bcryptjs';
 import { User } from './schema/user.schema';
@@ -32,7 +32,7 @@ export class UsersService {
       const savedUser = await user.save();
       return savedUser;
     } catch (error) {
-      console.error('❌ Error creando usuario:', error);
+      console.error('Error creando usuario:', error);
       throw error;
     }
   }
@@ -132,6 +132,26 @@ export class UsersService {
     data: UpdateQuery<User>,
     image?: Express.Multer.File,
   ) {
+    // Requisito #2: Validar que el nombre no esté vacío si se proporciona
+    if (data.name) {
+      if (typeof data.name !== 'string' || data.name.trim() === '') {
+        throw new BadRequestException('El nombre no puede estar vacío.'); // Requisito #2
+      }
+
+      // Requisito #3: Consultar que el nombre no esté en uso
+      const existingUser = await this.userModel.findOne({
+        name: data.name,
+        _id: { $ne: query._id }, // Excluir al usuario actual de la búsqueda
+        isDeleted: false,
+      });
+
+      if (existingUser) {
+        throw new ConflictException('El nombre ya está en uso por otro usuario.'); // Requisito #6
+      }
+    }
+
+
+
     if (image) {
       console.log("Editando con imagen")
       const user = await this.userModel.findOne({
