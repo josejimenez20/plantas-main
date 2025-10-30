@@ -17,6 +17,14 @@ export class Image {
 
   @Prop({ required: true, trim: true })
   isPublic: boolean;
+
+  @Prop({
+    type: String,
+    enum: ['Solo yo', 'Amigos', 'Público'],
+    default: 'Solo yo', // Por defecto, las fotos son privadas
+  })
+  privacy: string;
+
 }
 
 export const ImageSchema = SchemaFactory.createForClass(Image);
