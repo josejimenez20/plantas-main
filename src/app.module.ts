@@ -14,6 +14,7 @@ import { MailModule } from './mail/mail.module';
 import { MunicipioModule } from './municipio/municipio.module';
 import { PlantasModule } from './plantas/plantas.module';
 import { FavoritasModule } from './favoritas/favoritas.module';
+import { ProgresoModule } from './progreso/progreso.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FavoritasModule } from './favoritas/favoritas.module';
     PlantasModule,
     AuthModule,
     FavoritasModule,
+    ProgresoModule,
   ],
   controllers: [AppController, DmsController],
   providers: [AppService, DmsService, RolesGuard],
